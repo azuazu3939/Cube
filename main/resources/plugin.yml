@@ -1,0 +1,6 @@
+name: Cube
+version: '${project.version}'
+main: main.java.mc32.Main
+api-version: 1.17
+depend: [ProtocolLib]
+
