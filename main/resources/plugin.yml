@@ -4,3 +4,18 @@ main: main.java.mc32.Main
 api-version: 1.17
 depend: [ProtocolLib]
 
+commands:
+  CubeCall:
+    description: ArmorStandCarを呼び出すコマンド。
+    aliases: [cc]
+    permission: Cube.cubecall
+
+permissions:
+  Cube.*:
+    description: Cubeの全コマンドにアクセス可能。
+    default: true
+    children:
+      Cube.cubecall: true
+  Cube.cubecall:
+    description: Cubeのcubecallコマンドにアクセス可能。
+    default: true
