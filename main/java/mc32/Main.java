@@ -39,27 +39,41 @@ public class Main extends JavaPlugin implements Listener {
 
                     if (!(entity instanceof ArmorStand)) return;
 
-                    ArmorStand stand = (ArmorStand) event.getPlayer().getVehicle();
+                    ArmorStand stand1 = (ArmorStand) event.getPlayer().getVehicle();
 
-                    if (event.getPlayer() != null || event.getPlayer().getVehicle() == stand) {
+                    if (event.getPlayer() != null || event.getPlayer().getVehicle() == stand1) {
 
-                        Vector vector0 = event.getPlayer().getLocation().getDirection().multiply(0.9);
-                        Vector vector1 = event.getPlayer().getEyeLocation().getDirection().multiply(-0.9);
-                        Vector vector2 = event.getPlayer().getLocation().getDirection().setY(1);
-                        Vector vector3 = event.getPlayer().getLocation().getDirection().setY(-1);
+                        if(stand1.getPassengers().isEmpty()) return;
 
-                        if (ppisv.c() > 0.5) {
-                            Objects.requireNonNull(stand).setVelocity(vector0);
+                        Vector locVec = stand1.getVelocity();
+
+                        Vector vector0 = event.getPlayer().getVelocity().getMidpoint(new Vector()).multiply(100);
+                        Vector vector1 = event.getPlayer().getVelocity().getMidpoint(new Vector()).getMidpoint(vector0);
+                        Vector vector2 = event.getPlayer().getVelocity().getMidpoint(new Vector().setY(0.12).setX(0).setZ(0)).multiply(100);
+                        Vector vector3 = event.getPlayer().getVelocity().getMidpoint(new Vector().setY(-0.4));
+
+                        float loc1 = event.getPlayer().getLocation().getYaw();
+                        float loc2 = event.getPlayer().getLocation().getPitch();
+
+                        if (ppisv.c() > 0.1) {
+                            Objects.requireNonNull(stand1).setVelocity((vector0));
+                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
                         }
-                        if (ppisv.c() < -0.5) {
-                            Objects.requireNonNull(stand).setVelocity(vector1);
+                        if (ppisv.c() < -0.1) {
+                            Objects.requireNonNull(stand1).setVelocity(vector1);
+                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
                         }
                         if (ppisv.d()) {
-                            if (Objects.requireNonNull(stand).isOnGround())
-                                Objects.requireNonNull(stand).setVelocity(vector2);
+                            if (Objects.requireNonNull(stand1).isOnGround()) {
+                                Objects.requireNonNull(stand1).setVelocity(vector2);
+                                Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                            }
                         }
-                        if (!Objects.requireNonNull(stand).isOnGround())
-                            Objects.requireNonNull(stand).setVelocity(vector3);
+                        if (!Objects.requireNonNull(stand1).isOnGround()) {
+                            Objects.requireNonNull(stand1).setVelocity(vector3);
+                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                        }
+                        if (ppisv.e()) stand1.setSmall(false);
                     }
                 }
             }
@@ -70,6 +84,7 @@ public class Main extends JavaPlugin implements Listener {
     public void onDamage(EntityDamageByEntityEvent event) {
         Player player = (Player) event.getDamager();
         ArmorStand stand = (ArmorStand) event.getEntity();
+        stand.setSmall(true);
         stand.addPassenger(player);
         event.setCancelled(true);
     }
