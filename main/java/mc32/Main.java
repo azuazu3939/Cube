@@ -16,8 +16,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.Objects;
-
 public class Main extends JavaPlugin implements Listener {
 
     @Override
@@ -35,17 +33,17 @@ public class Main extends JavaPlugin implements Listener {
 
                 if (event.getPacketType().equals(PacketType.Play.Client.STEER_VEHICLE)) {
 
-                    Entity entity = Objects.requireNonNull(event.getPlayer().getVehicle());
+                    Player player = event.getPlayer();
+                    Entity entity = event.getPlayer().getVehicle();
 
                     if (!(entity instanceof ArmorStand)) return;
+                    if (player == null) return;
 
                     ArmorStand stand1 = (ArmorStand) event.getPlayer().getVehicle();
 
                     if (event.getPlayer() != null || event.getPlayer().getVehicle() == stand1) {
 
                         if(stand1.getPassengers().isEmpty()) return;
-
-                        Vector locVec = stand1.getVelocity();
 
                         Vector vector0 = event.getPlayer().getVelocity().getMidpoint(new Vector()).multiply(100);
                         Vector vector1 = event.getPlayer().getVelocity().getMidpoint(new Vector()).getMidpoint(vector0);
@@ -56,22 +54,22 @@ public class Main extends JavaPlugin implements Listener {
                         float loc2 = event.getPlayer().getLocation().getPitch();
 
                         if (ppisv.c() > 0.1) {
-                            Objects.requireNonNull(stand1).setVelocity((vector0));
-                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                            stand1.setVelocity((vector0));
+                            stand1.setRotation(loc1, loc2);
                         }
                         if (ppisv.c() < -0.1) {
-                            Objects.requireNonNull(stand1).setVelocity(vector1);
-                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                            stand1.setVelocity(vector1);
+                            stand1.setRotation(loc1, loc2);
                         }
                         if (ppisv.d()) {
-                            if (Objects.requireNonNull(stand1).isOnGround()) {
-                                Objects.requireNonNull(stand1).setVelocity(vector2);
-                                Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                            if (stand1.isOnGround()) {
+                                stand1.setVelocity(vector2);
+                                stand1.setRotation(loc1, loc2);
                             }
                         }
-                        if (!Objects.requireNonNull(stand1).isOnGround()) {
-                            Objects.requireNonNull(stand1).setVelocity(vector3);
-                            Objects.requireNonNull(stand1).setRotation(loc1, loc2);
+                        if (!stand1.isOnGround()) {
+                            stand1.setVelocity(vector3);
+                            stand1.setRotation(loc1, loc2);
                         }
                         if (ppisv.e()) stand1.setSmall(false);
                     }
@@ -82,11 +80,15 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageByEntityEvent event) {
-        Player player = (Player) event.getDamager();
-        ArmorStand stand = (ArmorStand) event.getEntity();
-        stand.setSmall(true);
-        stand.addPassenger(player);
-        event.setCancelled(true);
+        Entity entity = event.getDamager();
+        Entity entity1 = event.getEntity();
+        if (entity instanceof Player && entity1 instanceof ArmorStand) {
+            Player player = (Player) event.getDamager();
+            ArmorStand stand = (ArmorStand) event.getEntity();
+            stand.setSmall(true);
+            stand.addPassenger(player);
+            event.setCancelled(true);
+        }
     }
 }
 
