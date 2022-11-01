@@ -14,8 +14,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import org.spigotmc.event.entity.EntityDismountEvent;
+
+import java.util.Objects;
 
 public class Main extends JavaPlugin implements Listener {
 
@@ -45,15 +48,26 @@ public class Main extends JavaPlugin implements Listener {
 
                     if (event.getPlayer() != null || event.getPlayer().getVehicle() == stand1) {
 
-                        if(stand1.getPassengers().isEmpty()) return;
+                        int addspeed = 0;
+                        double addjump = 0;
+                        int addslow = 0;
 
-                        Vector vector0 = new Vector().add(player.getVelocity()).clone().multiply(100);
+                        if (stand1.getPassengers().isEmpty()) return;
+                        if (player.hasPotionEffect(PotionEffectType.SPEED)) addspeed = 5 * Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SPEED)).getAmplifier();
+                        if (player.hasPotionEffect(PotionEffectType.JUMP)) addjump = Objects.requireNonNull(player.getPotionEffect(PotionEffectType.JUMP)).getAmplifier();
+                        if (player.hasPotionEffect(PotionEffectType.SLOW)) addslow = 15 * Objects.requireNonNull(player.getPotionEffect(PotionEffectType.SLOW)).getAmplifier();
+
+                        Vector vector0 = new Vector().add(player.getVelocity()).clone().multiply((75 + addspeed * 3) - addslow);
                         Vector vector1 = vector0.getMidpoint(player.getVelocity());
-                        Vector vector2 = new Vector().add(player.getVelocity()).clone().multiply(200).setY(1.2);
-                        Vector vector3 = new Vector().add(player.getVelocity()).setY(-0.4);
+
+                        Vector vector2 = new Vector().add(player.getVelocity()).clone().multiply(150).setY(0.6 + addjump / 8);
+                        Vector vector3 = new Vector().add(player.getVelocity()).setY(-1);
+                        Vector vector4 = stand1.getVelocity().multiply(0.95);
 
                         float loc1 = event.getPlayer().getLocation().getYaw();
                         float loc2 = event.getPlayer().getLocation().getPitch();
+
+                        boolean jump = false;
 
                         if (ppisv.c() > 0.1) {
                             stand1.setVelocity(vector0);
@@ -63,19 +77,23 @@ public class Main extends JavaPlugin implements Listener {
                             stand1.setVelocity(vector1);
                             stand1.setRotation(loc1, loc2);
                         }
-                        if (ppisv.d()) {
-                            if (stand1.isOnGround()) {
-                                stand1.setVelocity(vector2);
-                                stand1.setRotation(loc1, loc2);
-                            }
+                        if (ppisv.d() && stand1.isOnGround()) {
+                            stand1.setVelocity(vector2);
+                            stand1.setRotation(loc1, loc2);
+                            jump = true;
                         }
                         if (!stand1.isOnGround()) {
                             stand1.setVelocity(vector3);
+
+                            if (ppisv.c() > 0.1) stand1.setVelocity(vector4);
+                            if (ppisv.d() && jump) stand1.setVelocity(vector2);
+
                             stand1.setRotation(loc1, loc2);
                         }
                         if (ppisv.e()) {
                             stand1.setSmall(false);
                         }
+
                     }
                 }
             }
@@ -87,11 +105,10 @@ public class Main extends JavaPlugin implements Listener {
         Entity entity = event.getDamager();
         Entity entity1 = event.getEntity();
         if (entity instanceof Player && entity1 instanceof ArmorStand) {
-            Player player = (Player) event.getDamager();
             ArmorStand stand = (ArmorStand) event.getEntity();
             stand.setSmall(true);
             stand.setCollidable(false);
-            stand.addPassenger(player);
+            stand.addPassenger(entity);
             event.setCancelled(true);
         }
     }
